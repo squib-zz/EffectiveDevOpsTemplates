@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 """Generating CloudFormation template."""
+
 from ipaddress import ip_network
 
 from ipify import get_ip
@@ -76,8 +78,9 @@ t.add_resource(ec2.SecurityGroup(
 
 ud = Base64(Join('\n', [
     "#!/bin/bash",
-    "yum install --enablerepo=epel -y git",
-    "pip install ansible",
+    "exec > /var/log/userdata.log 2>&1",
+    "sudo yum install --enablerepo=epel -y git",
+    "sudo pip install ansible",
     AnsiblePullCmd,
     "echo '*/10 * * * * {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
 ]))
@@ -98,6 +101,19 @@ t.add_resource(Role(
 t.add_resource(InstanceProfile(
     "InstanceProfile",
     Path="/",
+    Roles=[Ref("Role")]
+))
+
+t.add_resource(IAMPolicy(
+    "Policy",
+    PolicyName="AllowCodePipeline",
+    PolicyDocument=Policy(
+        Statement=[
+            Statement(Effect=Allow,
+                Action=[Action("codepipeline", "*")],
+                Resource=["*"])
+        ]
+    ),
     Roles=[Ref("Role")]
 ))
 
