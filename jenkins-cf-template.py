@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 """Generating CloudFormation template."""
-
 from ipaddress import ip_network
 
 from ipify import get_ip
@@ -111,7 +109,8 @@ t.add_resource(IAMPolicy(
         Statement=[
             Statement(Effect=Allow,
                 Action=[Action("codepipeline", "*")],
-                Resource=["*"])
+                Resource=["*"]
+            )
         ]
     ),
     Roles=[Ref("Role")]
