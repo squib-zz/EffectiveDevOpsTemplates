@@ -120,7 +120,6 @@ t.add_resource(ec2.SecurityGroup(
     ],
     VpcId=Ref("VpcId"),
 ))
-
 t.add_resource(ec2.SecurityGroup(
     "LoadBalancerSecurityGroup",
     GroupDescription="Web load balancer security group.",
@@ -137,21 +136,21 @@ t.add_resource(ec2.SecurityGroup(
 
 t.add_resource(elb.LoadBalancer(
     "LoadBalancer",
-    Scheme="internet facing",
+    Scheme="internet-facing",
     Listeners=[
         elb.Listener(
-            LoadBalencerPort="3000",
+            LoadBalancerPort="3000",
             InstancePort="3000",
             Protocol="HTTP",
             InstanceProtocol="HTTP"
         ),
     ],
     HealthCheck=elb.HealthCheck(
-    Target="HTTP:3000/"
-    HealthyThreshhold="5",
-    UnhealthyThreshhold="2",
-    Interval="20",
-    Timeout="15",
+        Target="HTTP:3000/",
+        HealthyThreshold="5",
+        UnhealthyThreshold="2",
+        Interval="20",
+        Timeout="15",
     ),
     ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
         Enabled=True,
