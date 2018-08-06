@@ -102,6 +102,26 @@ t.add_parameter(Parameter(
 ))
 
 t.add_resource(ec2.SecurityGroup(
+    "SecurityGroup",
+    GroupDescription="Allow SSH and TCP/{} access".format(ApplicationPort),
+    SecurityGroupIngress=[
+        ec2.SecurityGroupRule(
+            IpProtocol="tcp",
+            FromPort="22",
+            ToPort="22",
+            CidrIp=PublicCidrIp,
+        ),
+        ec2.SecurityGroupRule(
+            IpProtocol="tcp",
+            FromPort=ApplicationPort,
+            ToPort=ApplicationPort,
+            CidrIp="0.0.0.0/0",
+        ),
+    ],
+    VpcId=Ref("VpcId"),
+))
+
+t.add_resource(ec2.SecurityGroup(
     "LoadBalancerSecurityGroup",
     GroupDescription="Web load balancer security group.",
     VpcId=Ref("VpcId"),
@@ -113,7 +133,6 @@ t.add_resource(ec2.SecurityGroup(
             CidrIp="0.0.0.0/0",
         ),
     ],
-    VpcId=Ref("VpcId"),
 ))
 
 t.add_resource(elb.LoadBalancer(
@@ -133,7 +152,7 @@ t.add_resource(elb.LoadBalancer(
     UnhealthyThreshhold="2",
     Interval="20",
     Timeout="15",
-),
+    ),
     ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
         Enabled=True,
         Timeout=10,
@@ -141,25 +160,6 @@ t.add_resource(elb.LoadBalancer(
     CrossZone=True,
     Subnets=Ref("PublicSubnet"),
     SecurityGroups=[Ref("LoadBalancerSecurityGroup")],
-
-
-t.add_resource(ec2.SecurityGroup(
-    "SecurityGroup",
-    GroupDescription="Allow SSH and TCP/{} access".format(ApplicationPort),
-    SecurityGroupIngress=[
-        ec2.SecurityGroupRule(
-            IpProtocol="tcp",
-            FromPort="22",
-            ToPort="22",
-            CidrIp=PublicCidrIp,
-        ),
-        ec2.SecurityGroupRule (
-            IpProtocol="tcp",
-            FromPort=ApplicationPort,
-            ToPort=ApplicationPort,
-            CidrIp="0.0.0.0/0",
-        ),
-    ],      
 ))
 
 ud = Base64(Join('\n', [
@@ -284,7 +284,5 @@ t.add_output(Output(
         ":", ApplicationPort
     ]),
 ))
-
-
 
 print(t.to_json())
